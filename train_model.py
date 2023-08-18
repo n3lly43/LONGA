@@ -15,7 +15,6 @@ parser.add_argument('--pretrained_model', required=True, type=bool, help='pretra
 parser.add_argument('--train_from_scratch', default=False, required=True, type=bool, help='load encoder weights and finetune new model')
 parser.add_argument("--experiment_folder", required=True, type=str, help="Destination folder where checkpoints and experiment logs will be saved")
 parser.add_argument("--experiment_name", required=True, type=str, help="Current experiment name")
-parser.add_argument("--audio_folder", default=None, required=False, type=str, help="Audio folder if different from destination folder")
 args = parser.parse_args()
 
 config = OmegaConf.load(args.config_path)
