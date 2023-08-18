@@ -10,11 +10,36 @@ from pytorch_lightning import Trainer
 from nemo.utils import exp_manager
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config_path', required=True, type=str, help='config file path')
-parser.add_argument('--pretrained_model', required=True, type=bool, help='pretrained model from huggingface')
-parser.add_argument('--train_from_scratch', default=False, required=True, type=bool, help='load encoder weights and finetune new model')
-parser.add_argument("--experiment_folder", required=True, type=str, help="Destination folder where checkpoints and experiment logs will be saved")
-parser.add_argument("--experiment_name", required=True, type=str, help="Current experiment name")
+parser.add_argument(
+    '--config_path',
+     required=True,
+      type=str,
+       help='config file path')
+parser.add_argument(
+    '--pretrained_model',
+     required=True,
+      type=bool,
+       help='pretrained model from huggingface')
+parser.add_argument(
+    '--weights',
+     default='pretrained',
+       required=True,
+       type=str,
+       help='''
+       pretrained model weights to load: 
+       pretrained=full pretrained model, 
+       encoder=encoder weights
+       checkpoint=model checkpoint to resume training''')
+parser.add_argument(
+    "--experiment_folder",
+     required=True,
+      type=str,
+       help="Destination folder where checkpoints and experiment logs will be saved")
+parser.add_argument(
+    "--experiment_name",
+     required=True,
+      type=str,
+       help="Current experiment name")
 args = parser.parse_args()
 
 config = OmegaConf.load(args.config_path)
@@ -29,12 +54,13 @@ trainer = Trainer(devices=1,
                 check_val_every_n_epoch=2)
 
 model = nemo_asr.models.EncDecRNNTBPEModel(cfg=config.model, trainer=trainer)
-pretrained_model = nemo_asr.models.EncDecRNNTBPEModel.from_pretrained(args.pretrained_model, trainer=trainer)
+pretrained_model = nemo_asr.models.EncDecRNNTBPEModel.from_pretrained(
+   args.pretrained_model, trainer=trainer)
 
-if args.train_from_scratch:
+if args.weights=='encoder':
     model.encoder.load_state_dict(pretrained_model.encoder.state_dict(), strict=True)
 
-else:
+elif args.weights=='pretrained':
     model = pretrained_model
     model.cfg.train_ds.sample_rate = 16000
     model.cfg.validation_ds.sample_rate = 16000
@@ -48,6 +74,19 @@ else:
     model.cfg.tokenizer.dir = TOKENIZER
     model.cfg.tokenizer.type = TOKENIZER_TYPE_CFG
 
+elif args.weighs=='checkpoint':
+    model = nemo_asr.models.EncDecRNNTBPEModel.restore_from(
+      restore_path=args.pretrained_model, 
+      trainer=trainer)
+    
+    config.model.train_ds.sample_rate = 16000
+    config.model.validation_ds.sample_rate = 16000
+    config.model.test_ds.sample_rate = 16000
+    
+    model.set_trainer(trainer)
+    model.setup_training_data(config.model.train_ds)
+    model.setup_validation_data(config.model.validation_ds)
+    model.setup_test_data(config.model.test_ds)
 
 model.summarize()
 # Prepare NeMo's Experiment manager to handle checkpoint saving and logging for us
