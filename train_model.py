@@ -40,6 +40,12 @@ parser.add_argument(
      required=True,
       type=str,
        help="Current experiment name")
+# parser.add_argument(
+#     "--train_model",
+#     default=True,
+#      required=False,
+#       type=str,
+#        help="train or test the model on the data")
 args = parser.parse_args()
 
 config = OmegaConf.load(args.config_path)
@@ -82,7 +88,7 @@ elif args.weighs=='checkpoint':
     config.model.train_ds.sample_rate = 16000
     config.model.validation_ds.sample_rate = 16000
     config.model.test_ds.sample_rate = 16000
-    
+
     model.set_trainer(trainer)
     model.setup_training_data(config.model.train_ds)
     model.setup_validation_data(config.model.validation_ds)
@@ -132,3 +138,6 @@ if accelerator == 'gpu':
   torch.cuda.empty_cache()
 
 trainer.fit(model)
+# if args.train_model:
+# else:
+#     trainer.test(model)
