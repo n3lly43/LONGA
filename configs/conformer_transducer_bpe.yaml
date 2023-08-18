@@ -39,7 +39,7 @@ model:
     num_workers: 8
     pin_memory: true
   tokenizer:
-    dir: /content/drive/MyDrive/CGIAR/Speech Recognition/Data/Raw/Luganda/makerere_radio_dataset/transcribed/tokenizer_bpe_maxlen_4
+    dir: '{TOKENIZER}'
     type: bpe
   preprocessor:
     _target_: nemo.collections.asr.modules.AudioToMelSpectrogramPreprocessor
