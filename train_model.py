@@ -67,6 +67,11 @@ if args.weights=='encoder':
     model.encoder.load_state_dict(pretrained_model.encoder.state_dict(), strict=True)
 
 elif args.weights=='pretrained':
+    
+    config.model.train_ds.sample_rate = 16000
+    config.model.validation_ds.sample_rate = 16000
+    config.model.test_ds.sample_rate = 16000
+    
     model = pretrained_model
     model.cfg.train_ds.sample_rate = 16000
     model.cfg.validation_ds.sample_rate = 16000
