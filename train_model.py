@@ -18,7 +18,7 @@ parser.add_argument(
 parser.add_argument(
     '--pretrained_model',
      required=True,
-      type=bool,
+      type=str,
        help='pretrained model from huggingface')
 parser.add_argument(
     '--weights',
