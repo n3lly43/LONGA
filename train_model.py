@@ -1,10 +1,10 @@
 import os
 import gc
 import torch
-import OmegaConf
 import argparse
 import nemo.collections.asr as nemo_asr
 
+from omegaconf import OmegaConf, open_dict
 from config import accelerator, EPOCHS, TOKENIZER, TOKENIZER_TYPE_CFG
 from pytorch_lightning import Trainer
 from nemo.utils import exp_manager
