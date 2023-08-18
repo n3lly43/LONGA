@@ -70,4 +70,5 @@ config.model.tokenizer.type = args.tokenizer_type
 config.model.joint.fuse_loss_wer = args.fuse_loss_wer
 config.model.joint.fused_batch_size = 4  # this can be any value (preferably less than model.*_ds.batch_size)
 
-OmegaConf.save(args.config_path)
+with open(args.config_path, "w") as f:
+    OmegaConf.save(config, f)
