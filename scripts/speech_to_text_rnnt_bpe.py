@@ -58,7 +58,10 @@ For documentation on fine-tuning this model, please visit -
 https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/main/asr/configs.html#fine-tuning-configurations
 
 """
-!pip install git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
+import subprocess
+import sys
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", 'git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]'])
 import pytorch_lightning as pl
 from omegaconf import OmegaConf
 
