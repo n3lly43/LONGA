@@ -1,6 +1,7 @@
+import subprocess
 import streamlit as st
 from omegaconf import OmegaConf
-from scripts.speech_to_text_rnnt_bpe import main
+# from scripts.speech_to_text_rnnt_bpe import main
 
 #---------------------------------#
 # Page layout
@@ -13,9 +14,10 @@ st.set_page_config(page_title='The Machine Learning App',
 # Model training
 def train_model(from_pretrained):
     if from_pretrained:
-        main([
-        'config-path','../configs/',
-        'config-name','conformer_transducer_bpe',
+        subprocess.Popen([
+        '.\scripts\speech_to_text_rnnt_bpe.py'
+        '--config-path','../configs/',
+        '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
         'exp_manager.resume_if_exists',f'{resume_if_exists}',
         'exp_manager.resume_ignore_no_checkpoint',f'{resume_ignore_no_checkpoint}',
@@ -30,9 +32,10 @@ def train_model(from_pretrained):
         ])
 
     else:
-        main([
-        'config-path','../configs/',
-        'config-name','conformer_transducer_bpe',
+        subprocess.Popen([
+        '.\scripts\speech_to_text_rnnt_bpe.py'
+        '--config-path','../configs/',
+        '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
         'exp_manager.resume_if_exists',f'{resume_if_exists}',
         'exp_manager.resume_ignore_no_checkpoint',f'{resume_ignore_no_checkpoint}',
