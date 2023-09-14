@@ -16,7 +16,7 @@ def train_model(from_pretrained):
     if from_pretrained:
         subprocess.Popen([
         'python',
-        '.\scripts\speech_to_text_rnnt_bpe.py',
+        './scripts/speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
@@ -35,7 +35,7 @@ def train_model(from_pretrained):
     else:
         subprocess.Popen([
         'python',
-        '.\scripts\speech_to_text_rnnt_bpe.py',
+        './scripts/speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
