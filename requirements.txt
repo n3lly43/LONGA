@@ -3,4 +3,4 @@ omegaconf==2.3.0
 lightning==2.0.8
 streamlit==1.26.0
 fasttext
-git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
+# git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
