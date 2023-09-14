@@ -15,7 +15,8 @@ st.set_page_config(page_title='The Machine Learning App',
 def train_model(from_pretrained):
     if from_pretrained:
         subprocess.Popen([
-        '.\scripts\speech_to_text_rnnt_bpe.py'
+        'python',
+        '.\scripts\speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
@@ -33,7 +34,8 @@ def train_model(from_pretrained):
 
     else:
         subprocess.Popen([
-        '.\scripts\speech_to_text_rnnt_bpe.py'
+        'python',
+        '.\scripts\speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
         'exp_manager.name',f'{experiment_name}',
