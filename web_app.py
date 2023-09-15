@@ -19,6 +19,7 @@ def train_model(from_pretrained):
         './scripts/speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
+        'trainer.max_epochs',f'{max_epochs}',
         'exp_manager.name',f'{experiment_name}',
         'exp_manager.resume_if_exists',f'{resume_if_exists}',
         'exp_manager.resume_ignore_no_checkpoint',f'{resume_ignore_no_checkpoint}',
@@ -38,14 +39,17 @@ def train_model(from_pretrained):
         './scripts/speech_to_text_rnnt_bpe.py',
         '--config-path','../configs/',
         '--config-name','conformer_transducer_bpe',
+
         'exp_manager.name',f'{experiment_name}',
         'exp_manager.resume_if_exists',f'{resume_if_exists}',
         'exp_manager.resume_ignore_no_checkpoint',f'{resume_ignore_no_checkpoint}',
         'exp_manager.exp_dir','results/',
+
         'model.tokenizer.dir',f'{tokenizer_dir}',
         'model.train_ds.is_tarred',f'{is_tarred}',
         'model.train_ds.tarred_audio_filepaths',f'{train_filepaths}',
         'model.train_ds.manifest_filepath',f'{train_manifest}',
+        
         'model.validation_ds.manifest_filepath',f'{val_manifest}',
         'model.test_ds.manifest_filepath',f'{test_manifest}',
         # '+init_from_pretrained_model',f'{INIT_MODEL}'
@@ -74,6 +78,7 @@ with st.sidebar.header('2. Set Parameters'):
 
 with st.sidebar.subheader('2.1. Experiment Parameters'):
     experiment_name = st.sidebar.text_input('Please specify experiment name', '')
+    max_epochs = st.sidebar.number_input('Please specify number of epochs')
     resume_if_exists = st.sidebar.checkbox('Resume training if checkpoint exists')
     resume_ignore_no_checkpoint = st.sidebar.checkbox('Start training with no existing checkpoints')
 
@@ -89,7 +94,7 @@ with st.sidebar.subheader('2.2. Data Parameters'):
 # Displays the dataset
 st.subheader('1. Dataset')
 
-st.markdown('**1.2. Manifest Files**')
+st.markdown('**1.1. Manifest Files**')
 st.write('Training set')
 st.info(train_manifest)
 st.write('Validation set')
