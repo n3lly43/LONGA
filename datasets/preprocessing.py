@@ -1,5 +1,4 @@
 import os
-import re
 import sox
 import json
 import pandas as pd
@@ -8,9 +7,9 @@ from sox import Transformer
 
 from tqdm.contrib.concurrent import process_map
 from sklearn.model_selection import train_test_split
+from nemo.collections.asr.parts.utils.manifest_utils import read_manifest
 from utils import (tsv_to_json, remove_oov_characters, apply_preprocessors, 
                    remove_special_characters, replace_diacritics, write_processed_manifest)
-
 SEED = 935
 
 def decode_resample(
