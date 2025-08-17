@@ -4,4 +4,6 @@ demo-venv/etc/jupyter/nbconfig/notebook.d/widgetsnbextension.json
 *.pyc
 \demo-venv
 \scripts\__pycache__
+.\.venv
+.\__pycache__
 Untitled.ipynb

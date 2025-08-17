@@ -3,6 +3,7 @@ omegaconf==2.3.0
 lightning==2.0.8
 git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
 wget
+sox
 text-unidecode
 matplotlib>=3.3.2
 scikit-learn
