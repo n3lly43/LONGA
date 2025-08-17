@@ -1,12 +1,13 @@
 import io
 import os
+import re
 import wget
 import json
 import tarfile
 import logging
 import pandas as pd
 from collections import defaultdict
-from nemo.collections.asr.parts.utils.manifest_utils import read_manifest, write_manifest
+from nemo.collections.asr.parts.utils.manifest_utils import write_manifest
 
 logger = logging.getLogger(__name__)
 
@@ -177,3 +178,4 @@ def apply_preprocessors(manifest, preprocessors):
 
     logger.info("Finished processing manifest !")
     return manifest
+
