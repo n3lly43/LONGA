@@ -7,3 +7,9 @@ demo-venv/etc/jupyter/nbconfig/notebook.d/widgetsnbextension.json
 .\.venv
 .\__pycache__
 Untitled.ipynb
+Procfile
+config.py
+setup.sh
+train_model.py
+update_model_config.py
+web_app.py
