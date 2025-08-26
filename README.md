@@ -4,6 +4,19 @@
 
 This repo contains the codebase for [LONGA](https://cgspace.cgiar.org/items/b1acbc87-6f13-4911-b087-03076254d8c2)--a speech recognition tool designed for transcription of low resource, particularly Bantu, Languages. The tool was initially designed for Speech-to-Text (STT) processing of Luganda, and more recently Bambara, but the code in this repo tries to generalize adaptation of the tool for any (low resource) language.
 
+## Speech Recognition Data 
+Data used in training and evaluating the speech recognition models was sourced from radio recordings collected by [Farm Radio International (FRI)](https://farmradio.org/). Speech data from both the Luganda and Bambara Languages was annotated with the help of native speakers, trained and supervised by the FRI team. The annotated data was then cleaned and processed using the scripts in [data](/data/).  
+
+## Data Annotation
+The annotation process for both languages involved native speakers trained using a [transcription guide](https://zenodo.org/records/5855017) prepared by the Makerere AI Lab along with a video tutorial illustrating how to properly use the guide and annotation software. Manual transcription of audio recordings used to train and evaluate the ASR models was also carried out using [ELAN](https://archive.mpi.nl/tla/elan)–an annotation tool for audio and video recordings from the Max Planck Institute for Psycholinguistics. 
+
+## Preliminary Tests and Benchmarks
+For Luganda, tests were conducted using a sample of The Makerere Radio Speech Corpus where annotators were trained to transcribe a few audio samples following the transcription guide and were each thereafter required to prepare transcriptions for about 25 test set samples. The annotated test samples were then evaluated against the original transcriptions from the speech corpus using the Word Error Rate (WER) of the transcriptions. 
+
+![preliminary test results](media/prelim-results.png)
+
+Preliminary test results helped establish a benchmark for the Luganda model, where an average WER score of 39.59% obtained from human transcriptions was set as a baseline against which performance of the Luganda ASR models would be measured. 
+
 # Experiments
 The scripts in this repo contain all the classes and methods used in the original work, along with instructions on how to replicate the results obtained in the experiments. This work made use of pretrained models, with primary focus on the [Whisper model](https://openai.com/index/whisper/)–a transformer model trained on over 600 hours of speech data, and covering 99 languages. Moreover following [results from previous work](https://cgspace.cgiar.org/items/b1acbc87-6f13-4911-b087-03076254d8c2), the work tested several transducer models from [Nvidia’s NeMo catalog](https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#automatic-speech-recognition-models).
 

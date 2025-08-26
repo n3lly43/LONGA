@@ -1,7 +1,4 @@
 
-## Data Annotation
-The annotation process for both languages involved native speakers trained using a [transcription guide](https://zenodo.org/records/5855017) prepared by the Makerere AI Lab along with a video tutorial illustrating how to properly use the guide and annotation software. Manual transcription of audio recordings used to train and evaluate the ASR models was also carried out using [ELAN](https://archive.mpi.nl/tla/elan)–an annotation tool for audio and video recordings from the Max Planck Institute for Psycholinguistics. 
-
 ## Data Cleaning
 The *transcripts.py* script in the `datasets` directory contains code used in processing transcriptions obtained from ELAN. The methods in the script can be used to:
 1. Read and process csv files exported using ELAN
