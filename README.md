@@ -90,6 +90,38 @@ trainer.evaluate(dataset['test'])
 ### Nvidia NeMo Models
 This work made use of transducer and conformer models using checkpoints from models pretrained on open source data. Models tested include [a multilingual model](https://openreview.net/pdf?id=tuUHjowTKpC) from [MbazaNLP](https://huggingface.co/mbazaNLP)–a community working on Natural Language Processing for Kinyarwanda and other low-resource languages–trained on Kinyarwanda, Swahili, and Luganda speech data, as well as pretrained Bambara models from [RobotsMali](https://robotsmali.org/en/)–an initiative focused on improving access to emerging robotics and AI technologies in Mali and West Africa.
 
-Along with finetuning pretrained models, Nvidia’s Neural Modules (NeMo), coupled with the encoder-decoder nature of models used, allowed for more modular transfer learning where weights from the encoder of one architecture can be attached to the decoder of another. This enables the incorporating knowledge learned from acoustic patterns of one model into a model with a different decoder size or architecture, thus enhancing the attributes of both and improving overall model performance.
+Along with finetuning pretrained models, Nvidia’s Neural Modules (NeMo), coupled with the encoder-decoder nature of models used, allowed for more modular transfer learning where weights from the encoder of one architecture can be attached to the decoder of another. This enables incorporating knowledge learned from acoustic patterns of one model into a model with a different decoder size or architecture, thus enhancing the attributes of both and improving overall model performance.
 
+The models were finetuned using [Nvidia Neural Modules](https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/intro.html) using command line script as illustrated below:
 
+```Bash
+mkdir configs
+mkdir scripts
+
+#download files from NeMo repository
+wget -P configs/ https://raw.githubusercontent.com/NVIDIA/NeMo/main/examples/asr/conf/conformer/conformer_transducer_bpe.yaml
+wget -P scripts/ https://raw.githubusercontent.com/NVIDIA/NeMo/main/examples/asr/asr_transducer/speech_to_text_rnnt_bpe.py
+
+#Finetuning Nvidia Pretrained Model for Luganda
+python /scripts/speech_to_text_rnnt_bpe.py \
+    --config-path=../configs/ \
+    --config-name=conformer_transducer_bpe \
+    trainer.max_epochs=250 \
+    trainer.check_val_every_n_epoch=5 \
+    exp_manager.name=<name of experiment> \
+    exp_manager.resume_if_exists=true \
+    exp_manager.resume_ignore_no_checkpoint=true \
+    exp_manager.exp_dir=/experiment/directory \
+    model.tokenizer.dir=/path/to/tokenizer \
+    model.train_ds.max_duration=20 \
+    model.train_ds.min_duration=0.1 \
+    model.train_ds.is_tarred=false \
+    model.train_ds.manifest_filepath=/path/to/train/manifest \
+    model.validation_ds.manifest_filepath=/path/to/validation/manifest \
+    model.test_ds.manifest_filepath=/path/to/test/manifest \
+    model.test_ds.batch_size=4 \
+    model.joint.fused_batch_size=2 \
+    trainer.strategy="ddp_find_unused_parameters_true" \
+    +model.tokenizer.update_tokenizer=true \
+    +init_from_pretrained_model="mbazaNLP/stt_rw_sw_lg_conformer_ctc_large"
+```
