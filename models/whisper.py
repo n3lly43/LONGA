@@ -180,7 +180,7 @@ def prepare_trainer(
         decoder_start_token_id=model.config.decoder_start_token_id,
     )
     
-    return model, Seq2SeqTrainer(
+    return dataset, Seq2SeqTrainer(
         args=training_args,
         model=model,
         train_dataset=dataset["train"],

@@ -63,7 +63,7 @@ training_args = Seq2SeqTrainingArguments(
     push_to_hub=False,
 )
 #Luganda Model Trainer
-trainer = prepare_trainer(    
+dataset, trainer = prepare_trainer(    
         pretrained_model="Sunbird/asr-whisper-large-v3-salt",
         language="swahili",
         training_args=training_args,
@@ -77,8 +77,14 @@ trainer = prepare_trainer(
         dataset=None,
         repo_id=repo_id,
         push_to_hf=False,
-        eval_set='test'
+        eval_set='val'
 )
+
+trainer.train()
+
+#evaluate performance of hold-out set
+trainer.evaluate(dataset['test'])
+
 ```
 
 ### Nvidia NeMo Models
