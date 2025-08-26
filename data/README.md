@@ -1,6 +1,6 @@
 
 ## Data Cleaning
-The *transcripts.py* script in the `datasets` directory contains code used in processing transcriptions obtained from ELAN. The methods in the script can be used to:
+The *transcripts.py* script contains code used in processing transcriptions obtained from ELAN. The methods in the script can be used to:
 1. Read and process csv files exported using ELAN
 2. Summarize the audio and text information for the annotated data
 
