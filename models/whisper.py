@@ -6,7 +6,7 @@ from transformers import WhisperTokenizer
 from transformers import WhisperProcessor
 from transformers import WhisperFeatureExtractor
 from transformers import WhisperForConditionalGeneration
-from transformers import Seq2SeqTrainer
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
 from datasets import Audio, Dataset, DatasetDict, load_from_disk
 
 from utils import push_to_hugging_face
@@ -143,6 +143,7 @@ def load_pretrained_model(
 def prepare_trainer(
         pretrained_model:str,
         language:str,
+        training_args:Seq2SeqTrainingArguments,
         pretrained:bool=True,
         model:Optional[WhisperForConditionalGeneration]=None,
         train_manifest:Optional[str]=None,
@@ -161,6 +162,8 @@ def prepare_trainer(
     assert model is not None, "Specify model to use" 
 
     if dataset is None:
+        assert not any(m is None for m in [train_manifest, val_manifest, test_manifest]), \
+        "Specify manifest files to build dataset"
         dataset = prepare_dataset(train_manifest, 
                                     val_manifest, 
                                     test_manifest, 
@@ -177,7 +180,7 @@ def prepare_trainer(
         decoder_start_token_id=model.config.decoder_start_token_id,
     )
     
-    return Seq2SeqTrainer(
+    return model, Seq2SeqTrainer(
         args=training_args,
         model=model,
         train_dataset=dataset["train"],
