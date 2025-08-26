@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import multiprocessing
 from sox import Transformer
+from typing import Tuple, Optional
 
 from tqdm.contrib.concurrent import process_map
 from sklearn.model_selection import train_test_split
@@ -68,7 +69,9 @@ def dataset_split(
     data:pd.DataFrame, 
     transcript_col:str, 
     audio_files_dir:str,
-    save_path:str) -> None:
+    save_path:str,
+    return_splits:bool=False
+    ) -> Optional[Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]]:
 
     #split data into features and target
     df = data.copy()
@@ -96,6 +99,9 @@ def dataset_split(
     train[train['path'].isin(fls)].to_csv(f'{save_path}/train.tsv', sep="\t", index=False)
     test[test['path'].isin(fls)].to_csv(f'{save_path}/test.tsv', sep="\t", index=False)
     val[val['path'].isin(fls)].to_csv(f'{save_path}/dev.tsv', sep="\t", index=False)
+
+    if return_splits:
+        return train, val, test
 
 def process_data(
     tsv_file:str, 
