@@ -82,7 +82,7 @@ dataset, trainer = prepare_trainer(
 
 trainer.train()
 
-#evaluate performance of hold-out set
+#evaluate performance on hold-out set
 trainer.evaluate(dataset['test'])
 
 ```
