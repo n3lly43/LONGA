@@ -3,7 +3,7 @@
  
 ### Overview
 
-This repo contains the codebase for [LONGA](https://cgspace.cgiar.org/items/b1acbc87-6f13-4911-b087-03076254d8c2)--a speech recognition tool designed for transcription of low resource, particularly Bantu, Languages. The tool was initially designed for Speech-to-Text (STT) processing of Luganda, and more recently Bambara, but the code in this repo tries to generalize adaptation of the tool for any (low resource) language.
+This repo contains the codebase for [LONGA](https://cgspace.cgiar.org/items/b1acbc87-6f13-4911-b087-03076254d8c2)--a speech recognition tool designed for transcription of low resource, particularly Bantu, Languages. The tool was initially designed for Speech-to-Text (STT) processing of Luganda, and more recently Bambara, and the code in this repo is intended to replicate results from our experiments as well as to generalize adaptation of the tool for any (low resource) language.
 
 ## Speech Recognition Data 
 Data used in training and evaluating the speech recognition models was sourced from radio recordings collected by [Farm Radio International (FRI)](https://farmradio.org/). Speech data from both the Luganda and Bambara Languages was annotated with the help of native speakers, trained and supervised by the FRI team. The annotated data was then cleaned and processed using the scripts in [data](/data/).  
