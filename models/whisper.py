@@ -65,16 +65,7 @@ def prepare_dataset_from_manifest(
         
     return dataset            
 
-def prepare_dataset(
-        train_manifest:Optional[str]=None,
-        val_manifest:Optional[str]=None,
-        test_manifest:Optional[str]=None,
-        save_path:Optional[str]=None,
-        load_path:Optional[str]=None,
-        dataset:Optional[DatasetDict|Dataset]=None,
-        repo_id:Optional[str]=None,
-        push_to_hf:bool=False,
-        ) -> DatasetDict|Dataset:
+def prepare_dataset(cfg) -> DatasetDict|Dataset:
     """
     Prepare train, validation, and test datasets
 
@@ -89,25 +80,23 @@ def prepare_dataset(
     push_to_hf      - Push dataset to Hugging Face
 
     """
-    if load_path is not None:
-        dataset = load_from_disk(load_path)
+    if cfg.load_path is not None:
+        dataset = load_from_disk(cfg.load_path)
 
-    if dataset is None:
-        assert train_manifest is not None, "Specify dataset"
-        dataset = prepare_dataset_from_manifest(train_manifest, 
-                                                val_manifest, 
-                                                test_manifest)
+    dataset = prepare_dataset_from_manifest(cfg.train_manifest, 
+                                            cfg.val_manifest, 
+                                            cfg.test_manifest)
 
     cols = dataset.column_names
-    fri_dataset = dataset.map(encode_dataset, 
+    dataset = dataset.map(encode_dataset, 
                               remove_columns=cols["train"])
 
-    if save_path is not None:
-        fri_dataset.save_to_disk(save_path)
+    if cfg.save_path is not None:
+        dataset.save_to_disk(cfg.save_path)
 
-    if push_to_hf:
-        assert repo_id is not None, "Specify HF Repo"
-        fri_dataset.push_to_hub(repo_id=repo_id)
+    if cfg.push_to_hf:
+        assert cfg.repo_id is not None, "Specify HF Repo"
+        dataset.push_to_hub(repo_id=cfg.repo_id)
     
     return dataset
 
@@ -140,52 +129,14 @@ def load_pretrained_model(
 
     return model
 
-def prepare_trainer(
-        pretrained_model:str,
-        language:str,
-        training_args:Seq2SeqTrainingArguments,
-        pretrained:bool=True,
-        model:Optional[WhisperForConditionalGeneration]=None,
-        train_manifest:Optional[str]=None,
-        val_manifest:Optional[str]=None,
-        test_manifest:Optional[str]=None,
-        save_path:Optional[str]=None,
-        load_path:Optional[str]=None,
-        dataset:Optional[DatasetDict|Dataset]=None,
-        repo_id:Optional[str]=None,
-        push_to_hf:bool=False,
-        eval_set:str='test'
-        ):
-    if pretrained:
-        model = load_pretrained_model(pretrained_model, language)
+def prepare_model(cfg):
+    model = load_pretrained_model(cfg.pretrained_model, cfg.language)
 
-    assert model is not None, "Specify model to use" 
-
-    if dataset is None:
-        assert not any(m is None for m in [train_manifest, val_manifest, test_manifest]), \
-        "Specify manifest files to build dataset"
-        dataset = prepare_dataset(train_manifest, 
-                                    val_manifest, 
-                                    test_manifest, 
-                                    save_path, 
-                                    load_path, 
-                                    dataset, 
-                                    repo_id, 
-                                    push_to_hf
-                                    )
     # feature_extractor = WhisperFeatureExtractor.from_pretrained(pretrained_model)
-    processor = WhisperProcessor.from_pretrained(pretrained_model)
+    processor = WhisperProcessor.from_pretrained(cfg.pretrained_model)
     data_collator = DataCollatorSpeechSeq2SeqWithPadding(
         processor=processor,
         decoder_start_token_id=model.config.decoder_start_token_id,
     )
     
-    return dataset, Seq2SeqTrainer(
-        args=training_args,
-        model=model,
-        train_dataset=dataset["train"],
-        eval_dataset=dataset[eval_set],
-        data_collator=data_collator,
-        compute_metrics=lambda x: compute_metrics(x, pretrained_model),
-        processing_class=processor.feature_extractor,
-    )
+    return model, data_collator, processor

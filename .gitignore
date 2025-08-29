@@ -10,6 +10,5 @@ Untitled.ipynb
 Procfile
 config.py
 setup.sh
-train_model.py
 update_model_config.py
 web_app.py

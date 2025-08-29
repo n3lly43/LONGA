@@ -1,1 +1,1 @@
-from .whisper import prepare_trainer
+from .whisper import prepare_model, prepare_dataset, compute_metrics
