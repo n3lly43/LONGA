@@ -1,4 +1,5 @@
 # Speech Recognition for Low Resource Languages
+![Longa Logo](media/logo.jpg)
  
 ### Overview
 
