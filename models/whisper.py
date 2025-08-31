@@ -7,7 +7,7 @@ from transformers import WhisperProcessor
 from transformers import WhisperFeatureExtractor
 from transformers import WhisperForConditionalGeneration
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
-from datasets import Audio, Dataset, DatasetDict, load_from_disk
+from datasets import Audio, Dataset, DatasetDict, load_from_disk, load_dataset
 
 from utils import push_to_hugging_face
 from data.utils import DataCollatorSpeechSeq2SeqWithPadding
@@ -68,18 +68,11 @@ def prepare_dataset_from_manifest(
 def prepare_dataset(cfg) -> DatasetDict|Dataset:
     """
     Prepare train, validation, and test datasets
-
-    Args:    
-    train_manifest  - Path to training data manifest
-    val_manifest    - Path to validation data manifest
-    test_manifest   - Path to test data manifest
-    save_path       - Path to save Dataset object
-    load_path       - Path to dataset
-    dataset         - Dataset object
-    repo_id         - Hugging Face repository id
-    push_to_hf      - Push dataset to Hugging Face
-
     """
+    if cfg.load_from_hub:
+        assert cfg.repo_id is not None, "Specify Hugging Face repo with dataset"
+        return  load_dataset(cfg.repo_id)
+    
     if cfg.load_path is not None:
         dataset = load_from_disk(cfg.load_path)
 
@@ -91,13 +84,6 @@ def prepare_dataset(cfg) -> DatasetDict|Dataset:
     dataset = dataset.map(encode_dataset, 
                               remove_columns=cols["train"])
 
-    if cfg.save_path is not None:
-        dataset.save_to_disk(cfg.save_path)
-
-    if cfg.push_to_hf:
-        assert cfg.repo_id is not None, "Specify HF Repo"
-        dataset.push_to_hub(repo_id=cfg.repo_id)
-    
     return dataset
 
 def compute_metrics(pred, pretrained_model):
