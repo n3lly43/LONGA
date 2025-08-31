@@ -1,0 +1,33 @@
+dataset:
+  train_manifest: ??? #Path to training data manifest
+  val_manifest: ??? #Path to validation data manifest
+  test_manifest: ??? #Path to test data manifest
+  load_path: null #Path to dataset
+  load_from_hub: false
+  repo_id: null #Hugging Face repository id
+model:
+  pretrained_model: Sunbird/asr-whisper-large-v3-salt
+  language: swahili
+training_args:
+  output_dir: ???
+  per_device_train_batch_size: 16
+  gradient_accumulation_steps: 1
+  learning_rate: 1.0e-05
+  warmup_steps: 500
+  max_steps: 500000
+  gradient_checkpointing: true
+  fp16: true
+  eval_strategy: steps
+  per_device_eval_batch_size: 8
+  predict_with_generate: true
+  generation_max_length: 225
+  save_steps: 1000
+  eval_steps: 1000
+  logging_steps: 25
+  report_to:
+  - tensorboard
+  load_best_model_at_end: true
+  metric_for_best_model: wer
+  greater_is_better: false
+  push_to_hub: false
+  hub_model_id: null
