@@ -34,25 +34,33 @@ Along with finetuning pretrained models, Nvidia’s Neural Modules (NeMo), coupl
 ## Model Training
 Both the Whisper and NeMo models were trained using [Google Colab](https://colab.research.google.com/)–a hosted Jupyter Notebook service that provides free access to computing resources. All experiments were carried out in a GPU runtime environment using a single Nvidia A100 GPU with 40GB of VRAM. The NeMo models were trained for a maximum of 250 epochs with an early stopping callback that ended training if the validation set WER stopped improving for 10 epochs while the Whisper models were trained for a maximum of 10,000 steps.
 
+![Luganda model performance](/media/fri-model-performance.png)
+
+The Luganda Whisper model, finetuned from Sunbird’s SALT model, appeared to converge faster and to a lower WER score than the Conformer model that was finetuned from the MbazaNLP Multilingual model. Achieving a WER of about 42.94% in only 12 epochs, a total of 11,571 steps, the Whisper model’s performance was also relatively more stable, improving steadily over time as compared to the conformer that took significantly more steps to and was only able to attain a WER score of 56.18%. 
+
 Results from the original work can be replicated using command line script as illustrated below:
 
 ```bash
-# whisper model
+# Luganda whisper model
 python train.py \
-    --config-path=<path to config> \
-    --config-name<name of config without .yaml> \
+    --config-path=configs \
+    --config-name=luganda_whipser \
     model.pretrained_model=<name of model from Hugging Face> \
     model.language=<pretrained tokenizer language to use> \
     dataset.train_manifest=<path to train manifest> \
     dataset.val_manifest=<path to validation manifest> \
     dataset.test_manifest=<path to test manifest>
+```
 
-# NeMo model
+```bash
+# Luganda NeMo model
 python train.py \
-    --config-path=<path to config> \
-    --config-name<name of config without .yaml> \
+    --config-path=configs \
+    --config-name=luganda_conformer_transducer_bpe \
     model.tokenizer_dir=<path to tokenizer> \
     model.train_ds.manifest_filepath=<path to train manifest> \
     model.validation_ds.manifest_filepath=<path to validation manifest> \
     model.test_ds.manifest_filepath=<path to test manifest> 
 ```
+
+## Model Inference and Deployment
