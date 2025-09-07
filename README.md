@@ -1,5 +1,5 @@
 # Speech Recognition for Low Resource Languages
-![Longa Logo](media/logo.jpg)
+![Longa Logo](docs/media/logo.jpg)
  
 ### Overview
 
@@ -14,11 +14,19 @@ The annotation process for both languages involved native speakers trained using
 ### Preliminary Tests and Benchmarks
 For Luganda, tests were conducted using a sample of The Makerere Radio Speech Corpus where annotators were trained to transcribe a few audio samples following the transcription guide and were each thereafter required to prepare transcriptions for about 25 test set samples. The annotated test samples were then evaluated against the original transcriptions from the speech corpus using the Word Error Rate (WER) of the transcriptions. 
 
-![preliminary test results](media/prelim-results.png)
+![preliminary test results](docs/media/prelim-results.png)
 
 Preliminary test results helped establish a benchmark for the Luganda model, where an average WER score of 39.59% obtained from human transcriptions was set as a baseline against which performance of the Luganda ASR models would be measured. 
 
 ## Experiments
+To use Longa, first clone this repo and install dependencies then follow the tutorials included in [docs](/docs)
+```bash
+#clone repo and install dependencies
+git clone https://github.com/n3lly43/LONGA.git
+sudo apt-get install sox libsox-fmt-mp3
+cd LONGA && pip install -r requirements.txt
+cd LONGA
+```
 The scripts in this repo contain all the classes and methods used in the original work, along with instructions on how to replicate the results obtained in the experiments. This work made use of pretrained models, with primary focus on the [Whisper model](https://openai.com/index/whisper/)–a transformer model trained on over 600 hours of speech data, and covering 99 languages. Moreover following [results from previous work](https://cgspace.cgiar.org/items/b1acbc87-6f13-4911-b087-03076254d8c2), the work tested several transducer models from [Nvidia’s NeMo catalog](https://docs.nvidia.com/nemo-framework/user-guide/latest/nemotoolkit/asr/results.html#automatic-speech-recognition-models).
 
 ### Whisper
@@ -32,12 +40,6 @@ This work made use of transducer and conformer models using checkpoints from mod
 Along with finetuning pretrained models, Nvidia’s Neural Modules (NeMo), coupled with the encoder-decoder nature of models used, allowed for more modular transfer learning where weights from the encoder of one architecture can be attached to the decoder of another. This enables incorporating knowledge learned from acoustic patterns of one model into a model with a different decoder size or architecture, thus enhancing the attributes of both and improving overall model performance.
 
 ## Model Training
-Both the Whisper and NeMo models were trained using [Google Colab](https://colab.research.google.com/)–a hosted Jupyter Notebook service that provides free access to computing resources. All experiments were carried out in a GPU runtime environment using a single Nvidia A100 GPU with 40GB of VRAM. The NeMo models were trained for a maximum of 250 epochs with an early stopping callback that ended training if the validation set WER stopped improving for 10 epochs while the Whisper models were trained for a maximum of 10,000 steps.
-
-![Luganda model performance](/media/fri-model-performance.png)
-
-The Luganda Whisper model, finetuned from Sunbird’s SALT model, appeared to converge faster and to a lower WER score than the Conformer model that was finetuned from the MbazaNLP Multilingual model. Achieving a WER of about 42.94% in only 12 epochs, a total of 11,571 steps, the Whisper model’s performance was also relatively more stable, improving steadily over time as compared to the conformer that took significantly more steps to and was only able to attain a WER score of 56.18%. 
-
 Results from the original work can be replicated using command line script as illustrated below:
 
 ```bash
@@ -62,5 +64,11 @@ python train.py \
     model.validation_ds.manifest_filepath=<path to validation manifest> \
     model.test_ds.manifest_filepath=<path to test manifest> 
 ```
+Both the Whisper and NeMo models were trained using [Google Colab](https://colab.research.google.com/)–a hosted Jupyter Notebook service that provides free access to computing resources. All experiments were carried out in a GPU runtime environment using a single Nvidia A100 GPU with 40GB of VRAM. The NeMo models were trained for a maximum of 250 epochs with an early stopping callback that ended training if the validation set WER stopped improving for 10 epochs while the Whisper models were trained for a maximum of 10,000 steps.
+
+![Luganda model performance](docs/media/fri-model-performance.png)
+
+The Luganda Whisper model, finetuned from Sunbird’s SALT model, appeared to converge faster and to a lower WER score than the Conformer model that was finetuned from the MbazaNLP Multilingual model. Achieving a WER of about 42.94% in only 12 epochs, a total of 11,571 steps, the Whisper model’s performance was also relatively more stable, improving steadily over time as compared to the conformer that took significantly more steps to and was only able to attain a WER score of 56.18%. 
+
 
 ## Model Inference and Deployment
