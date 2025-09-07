@@ -5,15 +5,6 @@ from glob import glob
 from pydub import AudioSegment
 from typing import List, Tuple, Dict
 
-def insert_ids(data, name:str):
-    df = data.copy()
-    id_col = df['audio_name']
-
-    ids = f'{name}_'+id_col+'_'+df.groupby(['audio_name'], as_index=False).cumcount().astype(str)
-    df.insert(0, 'ID', ids)
-
-    return df
-
 def read_audio_file(audio_path):
     if '.wav' in audio_path:
         return AudioSegment.from_wav(audio_path)
@@ -57,7 +48,7 @@ def split_audio(
         t2 = df[df['ID']==id]['End Time - ss.msec'].astype(float).values.item() * 1000
 
         newAudio = audio_files[pth][t1:t2]
-        newAudio.export(f'{output_path}/clips/{id}.wav', format="wav")
+        newAudio.export(f'{output_path}/{id}.wav', format="wav")
 
 def prepare_audio_files(
     dfs:List[pd.DataFrame], 

@@ -1,6 +1,31 @@
 import pandas as pd
 from glob import glob
 from typing import List, Optional, Dict
+from tqdm.notebook import tqdm
+
+def insert_ids(data, name:str):
+    df = data.copy()
+    id_col = df['audio_name']
+
+    ids = f'{name}_'+id_col+'_'+df.groupby(['audio_name'], as_index=False).cumcount().astype(str)
+    df.insert(0, 'ID', ids)
+
+    return df
+
+def merge_text_cols(data, drop_cols, cols):
+    df_cols = ['ID', 'audio_name', 'pth', 'default']
+    df = data.copy()
+
+    text_cols = [c for c in set(df.columns)-set(cols) 
+                if c not in drop_cols+df_cols]
+    if text_cols:
+        df = df[df[text_cols].isna().sum(1)<len(text_cols)].reset_index(drop=True)
+
+        #mark overlapping speech
+        df['text'] = df[text_cols].apply(
+            lambda x: '--'.join(x.dropna().astype(str)),
+            axis=1)
+    return df.drop(columns=text_cols)
 
 def build_summary_dict(
         data:pd.DataFrame, 
@@ -25,17 +50,17 @@ def build_summary_dict(
     'Longest Clip (secs)':[df[duration_col].max()],
     'Shortest Clip (secs)':[df[duration_col].min()],
     'Average Clip Length (secs)':[ round(df[duration_col].mean(), 2)],
-    'Total Audio Files Assigned':[len(glob(f'{audio_data_path}/*/*[0-9].wav'))],
-    'Total Annotation (EAF) Files Submitted':[len(glob(f'{audio_data_path}/*/*[0-9].eaf'))],
-    'Total Transcription (CSV) Files Submitted':[len(glob(f'{audio_data_path}/*/*[0-9].csv'))],
+    'Total Audio Files Assigned':[len(glob(f'{audio_data_path}/*/*[a-zA-Z0-9].wav'))],
+    'Total Annotation (EAF) Files Submitted':[len(glob(f'{audio_data_path}/*/*[a-zA-Z0-9].eaf'))],
+    'Total Transcription (CSV) Files Submitted':[len(glob(f'{audio_data_path}/*/*[a-zA-Z0-9].csv'))],
     }
 
 def read_transcriptions(
         data_path:str,
         cols:List[str],      
-        rename_cols:Optional[Dict] = None,
-        replace_header:bool = False,
         sample_col:str = 'Duration - ss.msec',
+        replace_header:bool = False,
+        rename_cols:Optional[Dict] = None,
         drop_cols:Optional[List[str]] = None
         ):
     """
@@ -44,12 +69,22 @@ def read_transcriptions(
     Args:
     data_path - path to directory with transcription data
     """
-    # cols = ['Tier', 'Begin Time - hh:mm:ss.ms', 'Begin Time - ss.msec',
-    #         'End Time - hh:mm:ss.ms', 'End Time - ss.msec', 'Duration - hh:mm:ss.ms',
-    #         'Duration - ss.msec', 'text']
     dfs = check_tiers(data_path, cols, sample_col, 
                       rename_cols, replace_header, drop_cols)
-    return pd.concat(dfs).reset_index(drop=True)
+
+    transcript_df = pd.concat(dfs).reset_index(drop=True)
+    
+    drop_cols = [c for c in transcript_df.columns if c in drop_cols] if drop_cols is not None else []
+    rename_cols = {c:rename_cols[c] for c in transcript_df.columns if c in rename_cols.keys()} if rename_cols is not None else {}
+    
+    transcript_df = transcript_df.drop(columns=drop_cols).rename(columns=rename_cols)
+    return merge_text_cols(transcript_df, drop_cols, cols)
+
+def read_data(data_path):
+    try:
+        return pd.read_csv(data_path)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
 
 def check_tiers(
         data_path:str, 
@@ -62,13 +97,14 @@ def check_tiers(
     """Check if data was annotated with tiers and read accordingly"""
     
     use_cols = list(range(len(cols)+1))
-    file_list = glob(f'{data_path}/**/*[0-9].csv')
-    dfs = [pd.read_csv(pth) for pth in file_list]
 
-    if any(sample_col in df.columns for df in dfs):
-        if any(c in df.columns for df in dfs for c in ['Unnamed','examiner']):        
-            return [read_dfs(pth, rename_cols) for pth in file_list]
-          
+    #search for files in subfolders
+    file_list = glob(f'{data_path}/**/*[a-zA-Z0-9].csv', recursive=True)
+
+    #files saved in single folder
+    if not file_list:
+        file_list = glob(f'{data_path}/*[a-zA-Z0-9].csv', recursive=True)
+
         dfs = [pd.read_csv(pth, on_bad_lines='skip', header=1)\
             .dropna(axis=1, how='all')\
                 .assign(audio_name=pth\
@@ -79,27 +115,36 @@ def check_tiers(
                     else pd.read_csv(pth, on_bad_lines='skip')\
                         .dropna(axis=1, how='all')\
                             .assign(audio_name=pth.split('/')[-1]\
-                                    .replace('.csv', '')) for pth in file_list]
+                                    .replace('.csv', '')) 
+                                        for pth in tqdm(file_list, desc="preparing transcription data")]
           
         dfs = [df for df in dfs if df.shape[1]>2]
 
         return [df.dropna(
             subset=df.columns[list(df.columns).index('Duration - ss.msec')+1:], 
                 how='all') for df in dfs]
+
+    dfs = [read_data(pth) 
+            for pth in tqdm(file_list, desc="reading transcription files")]
     
+    if any(sample_col in df.columns for df in dfs):
+        if any(c in df.columns for df in dfs for c in ['Unnamed','examiner']):        
+            return [read_dfs(pth, rename_cols) 
+                        for pth in tqdm(file_list, desc="preparing transcription data")]
+                        
     if replace_header:
         return [read_dfs(pth, rename_cols, replace_header, drop_cols) 
-                for pth in file_list]
+                for pth in tqdm(file_list, desc="preparing transcription data")]
     
-    if use_cols==9:
+    if len(use_cols)==9:
         use_cols.remove(1)
 
     #read transcription data and add audio file names
     return [pd.read_csv(pth, header=None, usecols=use_cols, names=cols)\
                     .dropna(subset=['text'])\
                         .assign(audio_name=pth.split('/')[-1]\
-                                .replace('csv', ''))
-                    for pth in file_list]
+                                .replace('.csv', ''))
+                    for pth in tqdm(file_list, desc="preparing transcription data")]
 
 def read_dfs(
         pth:str, 
@@ -121,16 +166,25 @@ def read_dfs(
         assert rename_cols is not None, "Specify columns to replace"
         df = pd.read_csv(pth, header=1) 
 
-        if len(df.columns)<len(rename_cols):
-            return pd.read_csv(pth, 
-                            header=None, 
-                            usecols=list(range(2, len(rename_cols)+2)), 
-                            names=list(rename_cols.values()))
         
         if drop_cols is not None:
-            return df.rename(columns=rename_cols).drop(columns=drop_cols)
+            if len(df.columns)<len(rename_cols)+len(drop_cols):
+                return pd.read_csv(pth, 
+                                header=None, 
+                                usecols=list(range(2, len(rename_cols)+2)), 
+                                names=list(rename_cols.values())).dropna(subset=['text'])\
+                                                                    .assign(audio_name=pth.split('/')[-1]\
+                                                                        .replace('.csv', ''))
+                                
+            return df.drop(columns=drop_cols).rename(columns=rename_cols)\
+                                                .dropna(subset=['text'])\
+                                                    .assign(audio_name=pth.split('/')[-1]\
+                                                        .replace('.csv', ''))
         
-        return df.rename(columns=rename_cols)
+        return df.rename(columns=rename_cols)\
+                    .dropna(subset=['text'])\
+                        .assign(audio_name=pth.split('/')[-1]\
+                            .replace('.csv', ''))
     
 
     df = pd.read_csv(pth) 
@@ -142,11 +196,11 @@ def read_dfs(
     try:
         return df.dropna(subset=['participant'])\
             .assign(audio_name=pth.split('/')[-1]\
-                    .replace('csv', 'wav'))
+                    .replace('.csv', ''))
     
     except KeyError:
         #rename participant column and return the data
         return df.rename(columns=rename_cols)\
             .dropna(subset=['participant'])\
                 .assign(audio_name=pth.split('/')[-1]\
-                        .replace('csv', 'wav'))
+                        .replace('.csv', ''))
