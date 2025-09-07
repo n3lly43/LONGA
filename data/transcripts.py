@@ -33,7 +33,7 @@ def build_summary_dict(
 def read_transcriptions(
         data_path:str,
         cols:List[str],      
-        rename_cols:Optional[Dict],
+        rename_cols:Optional[Dict] = None,
         replace_header:bool = False,
         sample_col:str = 'Duration - ss.msec',
         drop_cols:Optional[List[str]] = None
