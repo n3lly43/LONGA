@@ -1,5 +1,5 @@
 import tarfile
-from utils import on_progress, get_file_progress_file_object_class, ProgressFileObject
+from .utils import on_progress, get_file_progress_file_object_class, ProgressFileObject
 
 
 def extract_tgz_file(tgz_filename:str) -> None:
