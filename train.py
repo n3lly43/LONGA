@@ -15,7 +15,24 @@ from models import prepare_model, prepare_dataset, compute_metrics
 @hydra_runner(config_path="configs/whisper", config_name="luganda_whisper_salt")
 def main(cfg):
     logging.info(f'Hydra config: {OmegaConf.to_yaml(cfg)}')
-    if cfg.model_arch=='NeMo':
+    if 'whisper' in cfg.name.lower():
+        model, data_collator, processor, feature_extractor, tokenizer = prepare_model(cfg.model)
+        dataset = prepare_dataset(cfg.dataset, feature_extractor, tokenizer)
+        training_args = Seq2SeqTrainingArguments(cfg.training_args)
+
+        trainer = Seq2SeqTrainer(
+            args=training_args,
+            model=model,
+            train_dataset=dataset["train"],
+            eval_dataset=dataset[cfg.dataset.eval_set],
+            data_collator=data_collator,
+            compute_metrics=lambda x: compute_metrics(x, tokenizer),
+            tokenizer=processor.feature_extractor,
+        )
+        trainer.train()
+        trainer.evaluate(dataset['test' if cfg.dataset.eval_set=='val' else 'val'])
+
+    else:
         trainer = pl.Trainer(**resolve_trainer_cfg(cfg.trainer))
         exp_manager(trainer, cfg.get("exp_manager", None))
         asr_model = EncDecRNNTBPEModel(cfg=cfg.model, trainer=trainer)
@@ -28,23 +45,6 @@ def main(cfg):
         if hasattr(cfg.model, 'test_ds') and cfg.model.test_ds.manifest_filepath is not None:
             if asr_model.prepare_test(trainer):
                 trainer.test(asr_model)
-
-    else:
-        dataset = prepare_dataset(cfg.dataset)
-        model, data_collator, processor = prepare_model(cfg.model)
-        training_args = Seq2SeqTrainingArguments(cfg.training_args)
-
-        trainer = Seq2SeqTrainer(
-            args=training_args,
-            model=model,
-            train_dataset=dataset["train"],
-            eval_dataset=dataset[cfg.dataset.eval_set],
-            data_collator=data_collator,
-            compute_metrics=lambda x: compute_metrics(x, cfg.model.pretrained_model),
-            tokenizer=processor.feature_extractor,
-        )
-        trainer.train()
-        trainer.evaluate(dataset['test' if cfg.dataset.eval_set=='val' else 'val'])
 
 
 if __name__ == '__main__':

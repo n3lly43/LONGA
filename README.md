@@ -46,12 +46,13 @@ Results from the original work can be replicated using command line script as il
 # Luganda whisper model
 python train.py \
     --config-path=configs \
-    --config-name=luganda_whipser \
+    --config-name=luganda_whisper \
     model.pretrained_model=<name of model from Hugging Face> \
     model.language=<pretrained tokenizer language to use> \
     dataset.train_manifest=<path to train manifest> \
     dataset.val_manifest=<path to validation manifest> \
-    dataset.test_manifest=<path to test manifest>
+    dataset.test_manifest=<path to test manifest> \
+    training_args.output_dir=<path to experiments directory>
 ```
 
 ```bash

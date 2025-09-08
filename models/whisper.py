@@ -1,17 +1,14 @@
 import evaluate
 import pandas as pd
-from typing import Optional, List, Tuple
+from typing import Optional
 
 from transformers import WhisperTokenizer
 from transformers import WhisperProcessor
 from transformers import WhisperFeatureExtractor
 from transformers import WhisperForConditionalGeneration
-from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
 from datasets import Audio, Dataset, DatasetDict, load_from_disk, load_dataset
 
-from utils import push_to_hugging_face
 from data.utils import DataCollatorSpeechSeq2SeqWithPadding
-from models import training_args
 
 def get_dataset_from_manifest(audio_data:str):
     df = pd.read_json(audio_data.replace('\ ', ' '), lines=True)
@@ -24,7 +21,7 @@ def get_dataset_from_manifest(audio_data:str):
 
     return Dataset.from_dict(data).cast_column("audio", Audio())
 
-def encode_dataset(batch):
+def encode_dataset(batch, feature_extractor, tokenizer):
     # load and resample audio data from 48 to 16kHz
     audio = batch["audio"]
 
@@ -65,7 +62,7 @@ def prepare_dataset_from_manifest(
         
     return dataset            
 
-def prepare_dataset(cfg) -> DatasetDict|Dataset:
+def prepare_dataset(cfg, feature_extractor, tokenizer) -> DatasetDict|Dataset:
     """
     Prepare train, validation, and test datasets
     """
@@ -81,17 +78,18 @@ def prepare_dataset(cfg) -> DatasetDict|Dataset:
                                             cfg.test_manifest)
 
     cols = dataset.column_names
-    dataset = dataset.map(encode_dataset, 
-                              remove_columns=cols["train"])
+    dataset = dataset.map(lambda batch: encode_dataset(batch, 
+                                                       feature_extractor, 
+                                                       tokenizer), 
+                          remove_columns=cols["train"])
 
     return dataset
 
-def compute_metrics(pred, pretrained_model):
+def compute_metrics(pred, tokenizer):
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
     # replace -100 with the pad_token_id
-    tokenizer = WhisperTokenizer.from_pretrained(pretrained_model)
     label_ids[label_ids == -100] = tokenizer.pad_token_id
 
     # we do not want to group tokens when computing the metrics
@@ -118,11 +116,13 @@ def load_pretrained_model(
 def prepare_model(cfg):
     model = load_pretrained_model(cfg.pretrained_model, cfg.language)
 
-    # feature_extractor = WhisperFeatureExtractor.from_pretrained(pretrained_model)
+    feature_extractor = WhisperFeatureExtractor.from_pretrained(cfg.pretrained_model)
+    tokenizer = WhisperTokenizer.from_pretrained(cfg.pretrained_model)
+
     processor = WhisperProcessor.from_pretrained(cfg.pretrained_model)
     data_collator = DataCollatorSpeechSeq2SeqWithPadding(
         processor=processor,
         decoder_start_token_id=model.config.decoder_start_token_id,
     )
     
-    return model, data_collator, processor
+    return model, data_collator, processor, feature_extractor, tokenizer
