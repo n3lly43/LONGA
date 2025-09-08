@@ -1,5 +1,4 @@
 Cython==3.0.2
-numpy==1.26.3
 omegaconf==2.3.0
 lightning==2.4.0
 git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
