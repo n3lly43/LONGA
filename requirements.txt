@@ -1,7 +1,7 @@
 Cython==3.0.2
 omegaconf==2.3.0
 lightning==2.4.0
-git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
+git+https://github.com/NVIDIA/NeMo.git@v2.5.0rc0#egg=nemo_toolkit[all]
 wget
 sox
 text-unidecode
@@ -9,7 +9,7 @@ matplotlib>=3.3.2
 scikit-learn
 pydub
 datasets[audio]==3.6.0 
-transformers==4.51.3 
+transformers==4.53.0 
 accelerate==1.6.0 
 evaluate==0.4.3 
 jiwer==3.1.0 
