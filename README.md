@@ -1,4 +1,10 @@
 # Speech Recognition for Low Resource Languages
+
+<a href="https://colab.research.google.com/drive/1SokESFUJEYarYa8mGHDcfVNrdojejfob#scrollTo=DktzWD9lAuoe"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/FarmRadioInternational/spaces)
+[![Hugging Face Datasets](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Datasets-blue)](https://huggingface.co/FarmRadioInternational/datasets)
+[![Hugging Face Models](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-blue)](https://huggingface.co/FarmRadioInternational/models)
+
 ![Longa Logo](docs/media/logo.jpg)
  
 ### Overview
@@ -73,3 +79,38 @@ The Luganda Whisper model, finetuned from Sunbird’s SALT model, appeared to co
 
 
 ## Model Inference and Deployment
+Once fine-tuned, the models can be uploaded onto Hugging Face using the code below;
+
+```Python
+from models.utils import push_to_hugging_face
+
+HF_TOKEN = "hugging face access token"
+model_path = "/path/to/model"
+repo_id = "name of hugging face repo"
+
+push_to_hugging_face(
+    token=HF_TOKEN, 
+    model_path=model_path, 
+    repo_id=repo_id, 
+    repo_type="model")
+```
+
+Similarly, the models can be downloaded from Hugging Face and ran using the code below
+
+```Python
+from huggingface_hub import login
+from transformers import pipeline, AutoProcessor, AutoModelForSpeechSeq2Seq
+
+login(new_session=False)
+
+# Use a pipeline as a high-level helper
+pipe = pipeline("automatic-speech-recognition", model=repo_id)
+
+# Load model directly
+processor = AutoProcessor.from_pretrained(repo_id)
+model = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id)
+```
+
+Once uploaded on Hugging Face, the models can then be deployed into [Spaces](https://huggingface.co/learn/audio-course/en/chapter5/demo) as demo applications for testing like the one illustrated below.
+
+![Luganda Demo](./docs/media/luganda-hf-demo.png)
