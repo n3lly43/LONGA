@@ -4,6 +4,10 @@ The *transcripts.py* script contains code used in processing transcriptions obta
 1. Read and process csv files exported using ELAN
 2. Summarize the audio and text information for the annotated data
 
+It should be noted that the preprocessing steps are dependent on the exported ELAN file, and the code in this repo was designed to work with the export format containing the columns below:
+
+![ELAN Export Format](./media/elan-export-format.png)
+
 The sample code block below can be used to process an exported csv file
 
 ```python
@@ -53,7 +57,7 @@ The transcription summary can be obtained using the following code block and sho
 import pandas as pd
 from data.transcripts import build_summary_dict
 
-annotator1_summary = pd.DataFrame(
+annotator_summary = pd.DataFrame(
     build_summary_dict(
         data=annotator1,
         audio_data_path="/path/to/audio/data",
