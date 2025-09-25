@@ -100,6 +100,7 @@ Similarly, the models can be downloaded from Hugging Face and ran using the code
 ```Python
 from huggingface_hub import login
 from transformers import pipeline, AutoProcessor, AutoModelForSpeechSeq2Seq
+from transformers.pipelines.pt_utils import KeyDataset
 
 login(new_session=False)
 
@@ -109,6 +110,10 @@ pipe = pipeline("automatic-speech-recognition", model=repo_id)
 # Load model directly
 processor = AutoProcessor.from_pretrained(repo_id)
 model = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id)
+
+preds = pipe(KeyDataset(dataset['test'], "audio"), batch_size=8)
+output_df = pd.DataFrame(dataset['test']['audio']).drop(columns=['array', 'sampling_rate'])
+output_df['preds'] = processor.tokenizer.batch_decode(preds, skip_special_tokens=True)
 ```
 
 Once uploaded on Hugging Face, the models can then be deployed into [Spaces](https://huggingface.co/learn/audio-course/en/chapter5/demo) as demo applications for testing like the one illustrated below.
