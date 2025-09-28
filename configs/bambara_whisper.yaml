@@ -1,3 +1,4 @@
+name: Longa Whisper OpenAI
 dataset:
   train_manifest: ???
   val_manifest: ???
