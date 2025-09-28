@@ -18,7 +18,7 @@ def main(cfg):
     if 'whisper' in cfg.name.lower():
         model, data_collator, processor, feature_extractor, tokenizer = prepare_model(cfg.model)
         dataset = prepare_dataset(cfg.dataset, feature_extractor, tokenizer)
-        training_args = Seq2SeqTrainingArguments(cfg.training_args)
+        training_args = Seq2SeqTrainingArguments(**cfg.training_args)
 
         trainer = Seq2SeqTrainer(
             args=training_args,
