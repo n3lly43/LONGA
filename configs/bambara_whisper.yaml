@@ -3,6 +3,7 @@ dataset:
   train_manifest: ???
   val_manifest: ???
   test_manifest: ???
+  eval_set: val
   load_path: null
   load_from_hub: false
   repo_id: null
