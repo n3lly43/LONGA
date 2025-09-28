@@ -13,6 +13,7 @@ dataset_config = OmegaConf.create({
     'train_manifest':MISSING,
     'val_manifest'  :MISSING,
     'test_manifest' :MISSING,
+    'eval_set'      :'val',
     'load_path'     :None,
     'load_from_hub' :False,
     'repo_id'       :None
@@ -40,7 +41,7 @@ train_args_config = OmegaConf.create({
     'save_steps':1000,
     'eval_steps':1000,
     'logging_steps':25,
-    'report_to':["tensorboard"],
+    'report_to':"tensorboard",
     'load_best_model_at_end':True,
     'metric_for_best_model':"wer",
     'greater_is_better':False,
